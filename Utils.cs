@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace Xmu.Crms.Services.Group1
+namespace Xmu.Crms.Services.Insomnia
 {
     public static class PasswordUtils
     {

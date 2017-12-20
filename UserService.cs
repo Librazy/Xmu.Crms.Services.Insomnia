@@ -6,7 +6,7 @@ using Xmu.Crms.Shared.Exceptions;
 using Xmu.Crms.Shared.Models;
 using Xmu.Crms.Shared.Service;
 
-namespace Xmu.Crms.Services.Group1
+namespace Xmu.Crms.Services.Insomnia
 {
     public class UserService : IUserService
     {
@@ -29,7 +29,7 @@ namespace Xmu.Crms.Services.Group1
 
         public UserInfo SignUpPhone(UserInfo user)
         {
-            var us = _db.UserInfos.SingleOrDefault(u => u.Phone == user.Phone);
+            var us = _db.UserInfo.SingleOrDefault(u => u.Phone == user.Phone);
             if (us == null)
             {
                 throw new UserNotFoundException();
@@ -53,7 +53,7 @@ namespace Xmu.Crms.Services.Group1
 
         public UserInfo GetUserByUserId(long id)
         {
-            var user = _db.UserInfos.Include(u => u.School).SingleOrDefault(u => u.Id == id);
+            var user = _db.UserInfo.Include(u => u.School).SingleOrDefault(u => u.Id == id);
             if (user == null)
             {
                 throw new UserNotFoundException();
