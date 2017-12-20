@@ -14,5 +14,10 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return serviceCollection.AddSingleton<ITimerService, TimerService>();
         }
+
+        public static IServiceCollection AddInsomniaSeminarGroupService(this IServiceCollection serviceCollection)
+        {
+            return serviceCollection.AddSingleton<ISeminarGroupService, GroupService>();
+        }
     }
 }
