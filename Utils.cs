@@ -50,11 +50,12 @@ namespace Xmu.Crms.Services.Insomnia
 
         private static bool ConstantTimeEquals(IReadOnlyList<byte> a, IReadOnlyList<byte> b)
         {
-            var diff = (uint)a.Count ^ (uint)b.Count;
+            var diff = (uint) a.Count ^ (uint) b.Count;
             for (var i = 0; i < a.Count && i < b.Count; i++)
             {
-                diff |= (uint)(a[i] ^ b[i]);
+                diff |= (uint) (a[i] ^ b[i]);
             }
+
             return diff == 0;
         }
     }
