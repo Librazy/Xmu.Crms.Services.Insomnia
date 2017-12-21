@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Xmu.Crms.Shared.Exceptions;
 using Xmu.Crms.Shared.Models;
 using Xmu.Crms.Shared.Service;
 namespace Xmu.Crms.Services.Insomnia
@@ -24,11 +25,42 @@ namespace Xmu.Crms.Services.Insomnia
 
         public long InsertSeminarGroupMemberById(long userId, long groupId)
         {
-            throw new NotImplementedException();
+            if (userId < 0 && groupId < 0)
+            {
+                throw new ArgumentException();
+            }
+            var group=_db.SeminarGroup.SingleOrDefault(s => s.Id == groupId);
+            if (group == null)
+            {
+                throw new GroupNotFoundException();
+            }
+            var student = _db.UserInfo.SingleOrDefault(u => u.Id == userId);
+            
+            if (student == null)
+            {
+                throw new UserNotFoundException();
+            }
+            var isExist = _db.SeminarGroupMember.Where(sg => sg.SeminarGroup.Id == groupId)
+                .Where(s => s.Student.Id == userId);
+            if (isExist != null)
+            {
+                throw new InvalidOperationException();
+            }
+            _db.SeminarGroupMember.Add(new SeminarGroupMember
+            {
+                SeminarGroup = group,
+                Student = student
+            });
+            _db.SaveChanges();
+            var seminargroup = _db.SeminarGroupMember.Where(g => g.SeminarGroup.Id == groupId)
+                .SingleOrDefault(s => s.Student.Id == userId);
+            return seminargroup.Id;
+            //throw new NotImplementedException();
         }
 
         public List<UserInfo> ListSeminarGroupMemberByGroupId(long groupId)
         {
+            
             throw new NotImplementedException();
         }
 
