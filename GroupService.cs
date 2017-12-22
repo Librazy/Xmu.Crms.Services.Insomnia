@@ -232,12 +232,47 @@ namespace Xmu.Crms.Services.Insomnia
                 throw new ClassNotFoundException();
             }
             var members = new List<UserInfo>();
-            _db.SeminarGroupMember.Where(s => s.SeminarGroup.Seminar.Id == seminarId)
-                .Select(s => s.Student)
+            _db.CourseSelection.Where(c => c.ClassInfo.Id == classId)
+                .Select(c => c.Student)
                 .ToList().ForEach(member => members.Add(member));
-            
+            var count = 0;
+            UserInfo[] memArrays = { };
+            members.ForEach(member => memArrays[count++] = member);
+            int looptime = memArrays.Length / 2;
+            var tick = DateTime.Now.Ticks;
+            var ran = new Random((int)(tick & 0xffffffffL) | (int)(tick >> 32));
+            while (looptime >= 0)
+            {
+                var ran1 = ran.Next(0, memArrays.Length);
+                var ran2 = ran.Next(0, memArrays.Length);
+                var temp = memArrays[ran1];
+                memArrays[ran1] = memArrays[ran2];
+                memArrays[ran2] = temp;
+                looptime--;
+            }
+            int countgroup = memArrays.Length / 5 + 1;
+            for (int i = 0; i < countgroup; i++)
+            {
+                _db.SeminarGroup.Add(new SeminarGroup
+                {
+                    Seminar = seminar,
+                    ClassInfo = classes
+                });
+                var group = _db.SeminarGroup.Where(s => s.Seminar.Id == seminarId)
+                    .SingleOrDefault(s => s.ClassInfo.Id == classId);
+                for (int j = 0; j < 5; j++)
+                {
+                    var usertemp = memArrays[i * 5 + j];
+                    _db.SeminarGroupMember.Add(new SeminarGroupMember
+                    {
+                        SeminarGroup = group,
+                        Student = usertemp
+                    });
+                }
+            }
             _db.SaveChanges();
-            throw new NotImplementedException();
+            return true;
+            //throw new NotImplementedException();
         }
 
         public SeminarGroup GetSeminarGroupById(long seminarId, long userId)
@@ -277,8 +312,20 @@ namespace Xmu.Crms.Services.Insomnia
             {
                 throw new ArgumentException();
             }
+            var group = _db.SeminarGroup.SingleOrDefault(s => s.Id == groupId);
+            if (group == null)
+            {
+                throw new GroupNotFoundException();
+            }
+            var topic = _db.Topic.SingleOrDefault(t => t.Id == topicId);
+            _db.SeminarGroupTopic.Add(new SeminarGroupTopic
+            {
+                Topic = topic,
+                SeminarGroup = group
+            });
             _db.SaveChanges();
-            throw new NotImplementedException();
+            return "";
+            //throw new NotImplementedException();
         }
 
         public void DeleteTopicByGroupId(long groupId)
@@ -304,10 +351,6 @@ namespace Xmu.Crms.Services.Insomnia
                 throw new ArgumentException();
             }
             var user = _db.UserInfo.SingleOrDefault(u => u.Id == userId);
-            if (user == null)
-            {
-                throw new UserNotFoundException();
-            }
             var group = _db.SeminarGroup.SingleOrDefault(s => s.Id == groupId);
             if (group == null)
             {
@@ -317,7 +360,7 @@ namespace Xmu.Crms.Services.Insomnia
             {
                 throw new InvalidOperationException();
             }
-            group.Leader = user;
+            group.Leader = user ?? throw new UserNotFoundException();
             _db.SaveChanges();
             //throw new NotImplementedException();
         }
