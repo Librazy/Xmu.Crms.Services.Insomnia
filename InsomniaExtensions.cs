@@ -10,5 +10,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddInsomniaFixedGroupService(this IServiceCollection serviceCollection) =>
             serviceCollection.AddScoped<IFixGroupService, FixedGroupService>();
+
+        public static IServiceCollection AddInsomniaLoginService(this IServiceCollection serviceCollection) =>
+            serviceCollection.AddScoped<ILoginService, LoginService>();
     }
 }
