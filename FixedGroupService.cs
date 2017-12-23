@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Xmu.Crms.Shared.Exceptions;
 using Xmu.Crms.Shared.Models;
 using Xmu.Crms.Shared.Service;
@@ -18,11 +20,11 @@ namespace Xmu.Crms.Services.Insomnia
 
         public long InsertFixGroupByClassId(long classId, long userId)
         {
-            if (classId < 0)
+            if (classId <= 0)
             {
                 throw new ArgumentException(nameof(classId));
             }
-            if (classId < 0)
+            if (userId <= 0)
             {
                 throw new ArgumentException(nameof(userId));
             }
@@ -35,20 +37,39 @@ namespace Xmu.Crms.Services.Insomnia
 
         public void DeleteFixGroupMemberByFixGroupId(long fixGroupId)
         {
-            throw new NotImplementedException();
+            if (fixGroupId <= 0)
+            {
+                throw new ArgumentException(nameof(fixGroupId));
+            }
+            _db.FixGroupMember.RemoveRange(_db.FixGroupMember.Include(m => m.FixGroup)
+                .Where(m => m.FixGroup.Id == fixGroupId));
+            _db.SaveChanges();
         }
 
         public long InsertFixGroupMemberById(long userId, long groupId)
         {
-            throw new NotImplementedException();
+            if (userId <= 0)
+            {
+                throw new ArgumentException(nameof(userId));
+            }
+            if (groupId <= 0)
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+            var grp = _db.FixGroup.Find(groupId) ?? throw new FixGroupNotFoundException();
+            var usr = _db.UserInfo.Find(userId) ?? throw new UserNotFoundException();
+            var fgm = _db.FixGroupMember.Add(new FixGroupMember() {FixGroup = grp, Student = usr});
+            _db.SaveChanges();
+            return fgm.Entity.Id;
         }
 
-        public List<UserInfo> ListFixGroupMemberByGroupId(long groupId)
+        public IList<UserInfo> ListFixGroupMemberByGroupId(long groupId)
         {
-            throw new NotImplementedException();
+            return _db.FixGroupMember.Include(f => f.FixGroup).Include(f => f.Student)
+                .Where(f => f.FixGroup.Id == groupId).Select(f => f.Student).ToList();
         }
 
-        public List<FixGroup> ListFixGroupByClassId(long classId)
+        public IList<FixGroup> ListFixGroupByClassId(long classId)
         {
             throw new NotImplementedException();
         }
@@ -68,12 +89,12 @@ namespace Xmu.Crms.Services.Insomnia
             throw new NotImplementedException();
         }
 
-        public List<FixGroupMember> GetFixGroupByGroupId(long groupId)
+        public IList<FixGroupMember> GetFixGroupByGroupId(long groupId)
         {
             throw new NotImplementedException();
         }
 
-        public long insertStudentIntoGroup(long userId, long groupId)
+        public long InsertStudentIntoGroup(long userId, long groupId)
         {
             throw new NotImplementedException();
         }
@@ -93,7 +114,7 @@ namespace Xmu.Crms.Services.Insomnia
             throw new NotImplementedException();
         }
 
-        public void fixedGroupToSeminarGroup(long semianrId, long fixedGroupId)
+        public void FixedGroupToSeminarGroup(long semianrId, long fixedGroupId)
         {
             throw new NotImplementedException();
         }
