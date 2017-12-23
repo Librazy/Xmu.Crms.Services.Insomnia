@@ -325,7 +325,7 @@ namespace Xmu.Crms.Services.Insomnia
                 .ToList();
         }
 
-        public void InsertTopicByGroupId(long groupId, long topicId)
+        public string InsertTopicByGroupId(long groupId, long topicId)
         {
             if (groupId < 0 || topicId < 0)
             {
@@ -345,6 +345,7 @@ namespace Xmu.Crms.Services.Insomnia
                 SeminarGroup = group
             });
             _db.SaveChanges();
+            return null;
         }
 
         public void AssignLeaderById(long groupId, long userId)
