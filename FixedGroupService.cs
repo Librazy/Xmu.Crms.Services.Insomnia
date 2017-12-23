@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Xmu.Crms.Shared.Exceptions;
@@ -13,10 +12,7 @@ namespace Xmu.Crms.Services.Insomnia
     {
         private readonly CrmsContext _db;
 
-        public FixedGroupService(CrmsContext db)
-        {
-            _db = db;
-        }
+        public FixedGroupService(CrmsContext db) => _db = db;
 
         public long InsertFixGroupByClassId(long classId, long userId)
         {
@@ -24,10 +20,12 @@ namespace Xmu.Crms.Services.Insomnia
             {
                 throw new ArgumentException(nameof(classId));
             }
+
             if (userId <= 0)
             {
                 throw new ArgumentException(nameof(userId));
             }
+
             var cls = _db.ClassInfo.Find(classId) ?? throw new ClassNotFoundException();
             var usr = _db.UserInfo.Find(userId) ?? throw new UserNotFoundException();
             var fg = _db.FixGroup.Add(new FixGroup {ClassInfo = cls, Leader = usr});
@@ -41,6 +39,7 @@ namespace Xmu.Crms.Services.Insomnia
             {
                 throw new ArgumentException(nameof(fixGroupId));
             }
+
             _db.FixGroupMember.RemoveRange(_db.FixGroupMember.Include(m => m.FixGroup)
                 .Where(m => m.FixGroup.Id == fixGroupId));
             _db.SaveChanges();
@@ -52,51 +51,113 @@ namespace Xmu.Crms.Services.Insomnia
             {
                 throw new ArgumentException(nameof(userId));
             }
+
             if (groupId <= 0)
             {
                 throw new ArgumentException(nameof(groupId));
             }
+
             var grp = _db.FixGroup.Find(groupId) ?? throw new FixGroupNotFoundException();
             var usr = _db.UserInfo.Find(userId) ?? throw new UserNotFoundException();
-            var fgm = _db.FixGroupMember.Add(new FixGroupMember() {FixGroup = grp, Student = usr});
+            var fgm = _db.FixGroupMember.Add(new FixGroupMember {FixGroup = grp, Student = usr});
             _db.SaveChanges();
             return fgm.Entity.Id;
         }
 
         public IList<UserInfo> ListFixGroupMemberByGroupId(long groupId)
         {
+            if (groupId <= 0)
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+
+            var fixGroup = _db.FixGroup.Find(groupId) ?? throw new FixGroupNotFoundException();
             return _db.FixGroupMember.Include(f => f.FixGroup).Include(f => f.Student)
-                .Where(f => f.FixGroup.Id == groupId).Select(f => f.Student).ToList();
+                .Where(f => f.FixGroup == fixGroup).Select(f => f.Student).ToList();
         }
 
         public IList<FixGroup> ListFixGroupByClassId(long classId)
         {
-            throw new NotImplementedException();
+            if (classId <= 0)
+            {
+                throw new ArgumentException(nameof(classId));
+            }
+
+            var cls = _db.ClassInfo.Find(classId) ?? throw new ClassNotFoundException();
+            return _db.FixGroup.Include(f => f.ClassInfo).Where(f => f.ClassInfo == cls).ToList();
         }
 
         public void DeleteFixGroupByClassId(long classId)
         {
-            throw new NotImplementedException();
+            if (classId <= 0)
+            {
+                throw new ArgumentException(nameof(classId));
+            }
+
+            var cls = _db.ClassInfo.Find(classId) ?? throw new ClassNotFoundException();
+            var members = _db.FixGroupMember.Include(f => f.FixGroup).ThenInclude(f => f.ClassInfo)
+                .Where(f => f.FixGroup.ClassInfo == cls);
+            var fixGroups = members.Select(m => m.FixGroup).Distinct();
+            _db.FixGroupMember.RemoveRange(members);
+            _db.FixGroup.RemoveRange(fixGroups);
+            _db.SaveChanges();
         }
 
         public void DeleteFixGroupByGroupId(long groupId)
         {
-            throw new NotImplementedException();
+            if (groupId <= 0)
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+
+            DeleteFixGroupMemberByFixGroupId(groupId);
+            _db.Remove(_db.FixGroup.Find(groupId) ?? throw new FixGroupNotFoundException());
         }
 
         public void UpdateFixGroupByGroupId(long groupId, FixGroup fixGroupBo)
         {
-            throw new NotImplementedException();
+            if (groupId <= 0)
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+
+            var fixGroup = _db.FixGroup.Find(groupId) ?? throw new FixGroupNotFoundException();
+            fixGroup.ClassInfo = fixGroupBo.ClassInfo;
+            fixGroup.Leader = fixGroupBo.Leader;
+            _db.SaveChanges();
         }
 
         public IList<FixGroupMember> GetFixGroupByGroupId(long groupId)
         {
-            throw new NotImplementedException();
+            if (groupId <= 0)
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+
+            var fixGroup = _db.FixGroup.Find(groupId) ?? throw new FixGroupNotFoundException();
+            return _db.FixGroupMember.Include(m => m.FixGroup).Where(m => m.FixGroup == fixGroup).ToList();
         }
 
         public long InsertStudentIntoGroup(long userId, long groupId)
         {
-            throw new NotImplementedException();
+            if (userId <= 0)
+            {
+                throw new ArgumentException(nameof(userId));
+            }
+
+            if (groupId <= 0)
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+
+            var fixGroup = _db.FixGroup.Find(groupId) ?? throw new FixGroupNotFoundException();
+            var entry = _db.FixGroupMember.Add(new FixGroupMember
+            {
+                FixGroup = fixGroup,
+                Student = _db.UserInfo.Find(userId) ?? throw new UserNotFoundException()
+            });
+            _db.SaveChanges();
+            return entry.Entity.Id;
         }
 
         public void DeleteTopicByGroupId(long groupId)
@@ -106,10 +167,23 @@ namespace Xmu.Crms.Services.Insomnia
 
         public FixGroup GetFixedGroupById(long userId, long classId)
         {
-            throw new NotImplementedException();
+            if (userId <= 0)
+            {
+                throw new ArgumentException(nameof(userId));
+            }
+
+            if (classId <= 0)
+            {
+                throw new ArgumentException(nameof(classId));
+            }
+
+            var usr = _db.UserInfo.Find(userId) ?? throw new UserNotFoundException();
+            var cls = _db.ClassInfo.Find(classId) ?? throw new ClassNotFoundException();
+            return _db.FixGroupMember.Include(m => m.Student).Include(m => m.FixGroup).ThenInclude(f => f.ClassInfo)
+                .Where(m => m.Student == usr && m.FixGroup.ClassInfo == cls).Select(m => m.FixGroup).SingleOrDefault();
         }
 
-        public void UpdateSeminarGroupById(long groupId, SeminarGroup @group)
+        public void UpdateSeminarGroupById(long groupId, SeminarGroup group)
         {
             throw new NotImplementedException();
         }
@@ -117,11 +191,6 @@ namespace Xmu.Crms.Services.Insomnia
         public void FixedGroupToSeminarGroup(long semianrId, long fixedGroupId)
         {
             throw new NotImplementedException();
-        }
-
-        public void FixedGroupToSeminarGroup(long seminarId)
-        {
-            Debug.WriteLine($"=====FixedGroupToSeminarGroup { seminarId } { DateTime.Now }=====");
         }
     }
 }
