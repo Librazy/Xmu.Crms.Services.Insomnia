@@ -8,11 +8,11 @@ using static Xmu.Crms.Services.Insomnia.PasswordUtils;
 
 namespace Xmu.Crms.Services.Insomnia
 {
-    public class LoginService : ILoginService
+    public class Pbkdf2LoginService : ILoginService
     {
         private readonly CrmsContext _db;
 
-        public LoginService(CrmsContext db) => _db = db;
+        public Pbkdf2LoginService(CrmsContext db) => _db = db;
 
         public UserInfo SignInWeChat(long userId, string code, string state, string successUrl) =>
             throw new NotImplementedException();
@@ -42,8 +42,8 @@ namespace Xmu.Crms.Services.Insomnia
             return entry.Entity;
         }
 
-        public bool DeleteTeacherAccount(long userId) => throw new NotImplementedException();
+        public void DeleteTeacherAccount(long userId) => throw new NotImplementedException();
 
-        public bool DeleteStudentAccount(long userId) => throw new NotImplementedException();
+        public void DeleteStudentAccount(long userId) => throw new NotImplementedException();
     }
 }
