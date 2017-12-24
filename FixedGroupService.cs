@@ -127,17 +127,6 @@ namespace Xmu.Crms.Services.Insomnia
             _db.SaveChanges();
         }
 
-        public IList<FixGroupMember> GetFixGroupByGroupId(long groupId)
-        {
-            if (groupId <= 0)
-            {
-                throw new ArgumentException(nameof(groupId));
-            }
-
-            var fixGroup = _db.FixGroup.Find(groupId) ?? throw new FixGroupNotFoundException();
-            return _db.FixGroupMember.Include(m => m.FixGroup).Where(m => m.FixGroup == fixGroup).ToList();
-        }
-
         public long InsertStudentIntoGroup(long userId, long groupId)
         {
             if (userId <= 0)
@@ -160,11 +149,6 @@ namespace Xmu.Crms.Services.Insomnia
             return entry.Entity.Id;
         }
 
-        public void DeleteTopicByGroupId(long groupId)
-        {
-            throw new NotImplementedException();
-        }
-
         public FixGroup GetFixedGroupById(long userId, long classId)
         {
             if (userId <= 0)
@@ -183,14 +167,23 @@ namespace Xmu.Crms.Services.Insomnia
                 .Where(m => m.Student == usr && m.FixGroup.ClassInfo == cls).Select(m => m.FixGroup).SingleOrDefault();
         }
 
-        public void UpdateSeminarGroupById(long groupId, SeminarGroup group)
+        public void FixedGroupToSeminarGroup(long semianrId, long fixedGroupId)
         {
             throw new NotImplementedException();
         }
 
-        public void FixedGroupToSeminarGroup(long semianrId, long fixedGroupId)
+        public void DeleteFixGroupUserById(long fixGroupId, long userId)
         {
-            throw new NotImplementedException();
+            var grp = _db.FixGroup.Find(fixGroupId) ?? throw new GroupNotFoundException();
+            var usr = _db.UserInfo.Find(userId) ?? throw new UserNotFoundException();
+            _db.FixGroupMember.RemoveRange(_db.FixGroupMember.Include(f => f.FixGroup).Where(f => f.FixGroup == grp && f.Student == usr));
+            _db.SaveChanges();
+        }
+
+        public IList<FixGroupMember> ListFixGroupByGroupId(long groupId)
+        {
+            var grp = _db.FixGroup.Find(groupId) ?? throw new GroupNotFoundException();
+            return _db.FixGroupMember.Include(f => f.FixGroup).Where(f => f.FixGroup == grp).ToList();
         }
     }
 }
