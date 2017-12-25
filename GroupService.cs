@@ -125,7 +125,7 @@ namespace Xmu.Crms.Services.Insomnia
                 throw new SeminarNotFoundException();
             }
 
-            return _db.SeminarGroup.Include(s => s.Seminar).Where(s => s.Seminar.Id == seminarId).ToList();
+            return _db.SeminarGroup.Include(s => s.Seminar).Include(s => s.Leader).Include(s => s.ClassInfo).Where(s => s.Seminar.Id == seminarId).ToList();
         }
 
         public void DeleteSeminarGroupBySeminarId(long seminarId)
@@ -300,15 +300,15 @@ namespace Xmu.Crms.Services.Insomnia
                 throw new SeminarNotFoundException();
             }
 
-            var user = _db.Seminar.Find(userId);
+            var user = _db.UserInfo.Find(userId);
             if (user == null)
             {
                 throw new UserNotFoundException();
             }
 
             var seminarmember = _db.SeminarGroupMember.Include(s => s.Student).Include(s => s.SeminarGroup)
-                .ThenInclude(sem => sem.Seminar).Where(s => s.Student.Id == userId)
-                .SingleOrDefault(sg => sg.SeminarGroup.Seminar.Id == seminarId);
+                .ThenInclude(sem => sem.Seminar).Where(s => s.Student == user)
+                .SingleOrDefault(sg => sg.SeminarGroup.Seminar == seminar);
             if (seminarmember == null)
             {
                 throw new InvalidOperationException();
