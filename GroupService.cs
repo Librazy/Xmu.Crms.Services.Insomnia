@@ -139,15 +139,17 @@ namespace Xmu.Crms.Services.Insomnia
             _db.SaveChanges();
         }
 
-        public long InsertSeminarGroupBySeminarId(long seminarId, SeminarGroup seminarGroup) //????
+        public long InsertSeminarGroupBySeminarId(long seminarId, long classId, SeminarGroup seminarGroup)
         {
             if (seminarId < 0)
             {
                 throw new ArgumentException();
             }
 
-            var seminarinfo = _db.Seminar.Find(seminarId);
+            var seminarinfo = _db.Seminar.Find(seminarId) ?? throw new SeminarNotFoundException();
+            var classinfo = _db.ClassInfo.Find(classId) ?? throw new ClassNotFoundException();
             seminarGroup.Seminar = seminarinfo;
+            seminarGroup.ClassInfo = classinfo;
             var group = _db.SeminarGroup.Add(seminarGroup);
             _db.SaveChanges();
             return group.Entity.Id;
@@ -217,7 +219,7 @@ namespace Xmu.Crms.Services.Insomnia
             return -1;
         }
 
-        public bool AutomaticallyGrouping(long seminarId, long classId)
+        public void AutomaticallyGrouping(long seminarId, long classId)
         {
             if (seminarId < 0 || classId < 0)
             {
@@ -278,7 +280,11 @@ namespace Xmu.Crms.Services.Insomnia
             }
 
             _db.SaveChanges();
-            return true;
+        }
+
+        public void AutomaticallyAllotTopic(long seminarId)
+        {
+            throw new NotImplementedException();
         }
 
         public SeminarGroup GetSeminarGroupById(long seminarId, long userId)
