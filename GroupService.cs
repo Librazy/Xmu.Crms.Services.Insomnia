@@ -413,5 +413,68 @@ namespace Xmu.Crms.Services.Insomnia
                 .Where(s => s.SeminarGroup.Id == groupId));
             _db.SaveChanges();
         }
+
+        //bool ISeminarGroupService.DeleteSeminarGroupMemberBySeminarGroupId(long seminarGroupId)
+        //{
+        //    if (seminarGroupId < 0)
+        //    {
+        //        throw new ArgumentException();
+        //    }
+        //    var group = _db.SeminarGroup.Find(seminarGroupId);
+        //    if (group == null)
+        //    {
+        //        throw new GroupNotFoundException();
+        //    }
+        //    _db.SeminarGroupMember.RemoveRange(_db.SeminarGroupMember.Include(s => s.SeminarGroup)
+        //        .Where(s => s.SeminarGroup.Id == seminarGroupId));
+        //    _db.SaveChanges();
+        //    return true;
+        //    //throw new NotImplementedException();
+        //}
+
+        //List<UserInfo> ISeminarGroupService.ListSeminarGroupMemberByGroupId(long groupId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //List<SeminarGroup> ISeminarGroupService.ListSeminarGroupIdByStudentId(long userId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //List<SeminarGroup> ISeminarGroupService.ListSeminarGroupBySeminarId(long seminarId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //bool ISeminarGroupService.DeleteSeminarGroupBySeminarId(long seminarId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //bool ISeminarGroupService.DeleteSeminarGroupByGroupId(long seminarGroupId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //List<SeminarGroup> ISeminarGroupService.ListGroupByTopicId(long topicId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //bool ISeminarGroupService.DeleteTopicByGroupId(long groupId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //bool ISeminarGroupService.AssignLeaderById(long groupId, long userId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //bool ISeminarGroupService.ResignLeaderById(long groupId, long userId)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }
