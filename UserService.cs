@@ -43,8 +43,13 @@ namespace Xmu.Crms.Services.Insomnia
 
         public UserInfo GetUserByUserId(long userId)
         {
-            return _db.UserInfo.Include(u => u.School).SingleOrDefault(u => u.Id == userId) ??
+            return _db.UserInfo.Find(userId) ??
                    throw new UserNotFoundException();
+        }
+
+        public UserInfo GetUserByUserNumber(string userNumber)
+        {
+            throw new NotImplementedException();
         }
 
         public IList<long> ListUserIdByUserName(string userName)

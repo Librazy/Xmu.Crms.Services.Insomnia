@@ -170,6 +170,11 @@ namespace Xmu.Crms.Services.Insomnia
             //throw new NotImplementedException();
         }
 
+        public void DeleteSeminarGroupMemberById(long seminarGroupId, long userId)
+        {
+            throw new NotImplementedException();
+        }
+
         public void DeleteSeminarGroupByGroupId(long seminarGroupId)
         {
             if (seminarGroupId < 0)

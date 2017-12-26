@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Xmu.Crms.Shared.Exceptions;
 using Xmu.Crms.Shared.Models;
@@ -28,7 +29,7 @@ namespace Xmu.Crms.Services.Insomnia
             top.Description = topic.Description;
             top.GroupNumberLimit = topic.GroupNumberLimit;
             top.GroupStudentLimit = topic.GroupStudentLimit;
-            top.Serial = topic.Serial;
+            top.Serial = topic.Serial ?? top.Serial;
             _db.SaveChanges();
         }
 
@@ -47,6 +48,10 @@ namespace Xmu.Crms.Services.Insomnia
         {
             var sem = _db.Seminar.Find(seminarId) ?? throw new SeminarNotFoundException();
             topic.Seminar = sem;
+            topic.Serial = topic.Serial ?? Encoding.ASCII.GetChars(new[]
+            {
+                (byte) (_db.Topic.Count(t => t.SeminarId == seminarId) + Encoding.ASCII.GetBytes("A")[0])
+            })[0].ToString();
             var ent = _db.Topic.Add(topic);
             _db.SaveChanges();
             return ent.Entity.Id;
@@ -86,6 +91,11 @@ namespace Xmu.Crms.Services.Insomnia
         {
             _db.RemoveRange(ListTopicBySeminarId(seminarId));
             _db.SaveChanges();
+        }
+
+        public int GetRestTopicById(long topicId, long classId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
