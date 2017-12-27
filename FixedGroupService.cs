@@ -163,8 +163,16 @@ namespace Xmu.Crms.Services.Insomnia
 
             var usr = _db.UserInfo.Find(userId) ?? throw new UserNotFoundException();
             var cls = _db.ClassInfo.Find(classId) ?? throw new ClassNotFoundException();
-            return _db.FixGroupMember.Include(m => m.Student).Include(m => m.FixGroup).ThenInclude(f => f.ClassInfo)
-                .Where(m => m.Student == usr && m.FixGroup.ClassInfo == cls).Select(m => m.FixGroup).SingleOrDefault();
+            var fixGroup = _db.FixGroupMember.Include(m => m.FixGroup)
+                .Where(m => m.StudentId == usr.Id && m.FixGroup.ClassId == cls.Id).Select(m => m.FixGroup).SingleOrDefault();
+            if (fixGroup != null)
+            {
+                return fixGroup;
+            }
+            fixGroup = _db.FixGroup.Find(InsertFixGroupByClassId(classId, userId));
+            InsertFixGroupMemberById(userId, fixGroup.Id);
+
+            return fixGroup;
         }
 
         public void FixedGroupToSeminarGroup(long semianrId, long fixedGroupId)

@@ -119,13 +119,8 @@ namespace Xmu.Crms.Services.Insomnia
                 throw new ArgumentException();
             }
 
-            var seminar = _db.Seminar.SingleOrDefault(s => s.Id == seminarId);
-            if (seminar == null)
-            {
-                throw new SeminarNotFoundException();
-            }
-
-            return _db.SeminarGroup.Include(s => s.Seminar).Include(s => s.Leader).Include(s => s.ClassInfo).Where(s => s.Seminar.Id == seminarId).ToList();
+            var seminar = _db.Seminar.Find(seminarId) ?? throw new SeminarNotFoundException();
+            return _db.SeminarGroup.Include(s => s.Seminar).Where(s => s.SeminarId == seminar.Id).ToList();
         }
 
         public void DeleteSeminarGroupBySeminarId(long seminarId)

@@ -62,16 +62,24 @@ namespace Xmu.Crms.Services.Insomnia
             var usr = GetUserByUserId(userId);
             usr.Name = user.Name;
             usr.Avatar = user.Avatar;
-            usr.Education = user.Education;
+            usr.Education = user.Education ?? Education.Bachelor;
             usr.Email = user.Email;
             usr.Gender = user.Gender;
-            usr.School = _db.School.Find(user.School.Id);
-            usr.Title = user.Title;
+            if (user.School != null)
+            {
+                usr.School = _db.School.Find(user.School.Id);
+            }
+            if ((user.SchoolId ?? 0) != 0)
+            {
+                usr.School = _db.School.Find(user.SchoolId);
+            }
+            usr.Title = user.Title ?? Title.Professer;
             if (usr.Type == Type.Unbinded)
             {
                 usr.Type = user.Type;
+                usr.Number = user.Number;
             }
-            else if (usr.Type != user.Type)
+            else if (user.Type != null && usr.Type != user.Type)
             {
                 throw new InvalidOperationException();
             }
